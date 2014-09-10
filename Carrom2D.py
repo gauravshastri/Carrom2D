@@ -3,13 +3,12 @@ from pygame.locals import *
 import math
 from numpy import *
 
-friction = 0.18
+friction = 0.16
 wid = 700
 hitstrength=0.45
 
 RED=(255,0,0)
 BLUE=(0,0,255)
-WOODEN = (192, 64, 0)#used nowhere
 YELLOW=(245,190,154)#Center Circle
 BLACK = (0,0,0)
 PINK = (242,4,105)
@@ -17,7 +16,7 @@ CREAM = (238,199,154)#Background color, peg's color
 GREEN = (0,170,0)# Valid region of dragging mouse
 GREY=(40,40,40)
 
-Strikerrad = (wid*3/100 - 1)
+strikerrad = (wid*3/100 - 1)
 Pegrad=(wid/50)
 border = Pegrad*9/5
 pi=3.14
@@ -37,19 +36,19 @@ class Peg(pygame.sprite.Sprite):
 		if color==BLACK:
 			self.isWhite = False
 			self.isQueen = False
-			self.isBlack = True
+			self.isBLACK = True
 			for i in range(radius):
 				pygame.draw.ellipse(self.image, (5*i, 5*i, 5*i), [i, i, 2*radius-2*i, 2*radius-2*i])
 		elif color==CREAM:
 			self.isWhite = True
 			self.isQueen = False
-			self.isBlack = False
+			self.isBLACK = False
 			for i in range(radius):
 				pygame.draw.ellipse(self.image, (245-radius*5+5*i, 245-radius*5+5*i, 245-radius*5+5*i), [i, i, 2*radius-2*i, 2*radius-2*i])
 		elif color==PINK:
 			self.isWhite = False
 			self.isQueen = True
-			self.isBlack = False
+			self.isBLACK = False
 			for i in range(radius):
 				pygame.draw.ellipse(self.image, (250-i, 2*i, 85+i), [i, i, 2*radius-2*i, 2*radius-2*i])
 			pygame.draw.circle(self.image, BLUE,(radius,radius),radius,2)	
@@ -61,19 +60,12 @@ class Peg(pygame.sprite.Sprite):
 		self.inhole=False
 
 	def sound(self):
-		if self.isWhite or self.isQueen or self.isBlack :
+		if self.isWhite or self.isQueen or self.isBLACK :
 			pygame.mixer.music.load("inpocket.ogg")
 			pygame.mixer.music.play(1, 0.0)
 			time.sleep(.12)
 			pygame.mixer.music.stop()
 
-	def count(self):
-		if self.isWhite:
-			WhiteCount-=1
-		elif self.isQueen:
-			pass#DO Something
-		else:
-			BlackCount-=1
 	def update(self):
 		self.rect.centerx+=self.velx
 		self.rect.centery+=self.vely
@@ -111,7 +103,7 @@ class Striker(pygame.sprite.Sprite):
 		pygame.draw.circle(self.image, color,(radius,radius),radius-1)
 		self.velx=5
 		self.vely=15
-		self.radius=Strikerrad
+		self.radius=strikerrad
 		self.state=0
 		self.player=1	
 		self.player1score=0
@@ -120,7 +112,7 @@ class Striker(pygame.sprite.Sprite):
 	def sound(self):
 		pygame.mixer.music.load("strikerfoul.mp3")
 		pygame.mixer.music.play(1, 0.0)
-		time.sleep(.50)
+		time.sleep(.10)
 		pygame.mixer.music.stop()
 
 	def update(self):
@@ -145,13 +137,13 @@ class Striker(pygame.sprite.Sprite):
 		elif(self.state==2):			
 				self.rect.centerx+=self.velx
 				self.rect.centery+=self.vely
-				if self.rect.y > wid-border-2*Strikerrad  :
-					self.rect.y = wid-border-2*Strikerrad
+				if self.rect.y > wid-border-2*strikerrad  :
+					self.rect.y = wid-border-2*strikerrad
 					self.vely = -1*self.vely
 				elif self.rect.y<border:
 					self.rect.y=border
 					self.vely = -1*self.vely
-				if self.rect.x > wid-border-2*Strikerrad :
+				if self.rect.x > wid-border-2*strikerrad :
 					self.velx = -1*self.velx
 				elif self.rect.x<border:
 					self.rect.x=border
@@ -166,45 +158,6 @@ class Striker(pygame.sprite.Sprite):
 						self.velx=0
 					if abs(self.vely)<friction:
 						self.vely=0 
-
-		if (self.rect.x<27*Pegrad/10-Pegrad/2 and self.rect.y<27*Pegrad/10-Pegrad/2 ) :
-			self.rect.x=wid/2
-			self.sound()
-			self.velx=0
-			self.vely=0
-			if self.player==1:
-				self.rect.y=wid-6*Pegrad
-			elif self.player==2:
-				self.rect.y=6*Pegrad
-		elif (self.rect.x<27*Pegrad/10-Pegrad/2 and self.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10) :
-			self.rect.x=wid/2
-			self.sound()
-			self.velx=0
-			self.vely=0
-			if self.player==1:
-				self.rect.y=wid-6*Pegrad
-			elif self.player==2:
-				self.rect.y=6*Pegrad
-		elif (self.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and self.rect.y<27*Pegrad/10-Pegrad/2) :
-			self.rect.x=wid/2
-			self.sound()
-			self.velx=0
-			self.vely=0
-			if self.player==1:
-				self.rect.y=wid-6*Pegrad
-			elif self.player==2:
-				self.rect.y=6*Pegrad
-		elif (self.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and self.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10) :
-			self.rect.x=wid/2
-			self.sound()
-			self.velx=0
-			self.vely=0
-			if self.player==1:
-				self.rect.y=wid-6*Pegrad
-			elif self.player==2:
-				self.rect.y=6*Pegrad			          
-
-	
 
 
 def collideBalls(ball1,ball2):
@@ -239,7 +192,7 @@ def collideBalls(ball1,ball2):
 
 
 class CarromBoard():
-	def __init__(self, width=wid, height=wid, caption="Carrom Board"):
+	def __init__(self, width=wid*4/3, height=wid, caption="Carrom Board"):
 		pygame.init()
 		self.width, self.height, self.caption = width, height, caption
 		self.screen=pygame.display.set_mode((self.width, self.height))
@@ -266,17 +219,12 @@ class CarromBoard():
 		self.peg_list.add(Peg(CREAM,Pegrad-1,286*Pegrad/10,23*Pegrad))
 		
 		self.striker_list = pygame.sprite.Group()
-		self.striker = Striker(BLUE,Strikerrad,wid/2,wid-(4*Strikerrad))
+		self.striker = Striker(BLUE,strikerrad,wid/2,wid-(4*strikerrad))
 		self.striker_list.add(self.striker)
 
 		self.draw()
 
 	def draw(self):
-		'''
-		texture=pygame.image.load('texture.png')
-	 	DISPLAYSURF = pygame.display.set_mode((wid,wid), 0, 32)
-		DISPLAYSURF.blit(texture, (0,0))
-		'''
 		self.screen.fill(CREAM)
 		pygame.draw.lines(self.screen, BLACK, False, [(8*Pegrad,5*Pegrad),(42*Pegrad,5*Pegrad)],2*Pegrad/10)
 		pygame.draw.lines(self.screen, BLACK, False, [(8*Pegrad,7*Pegrad),(42*Pegrad,7*Pegrad)],2*Pegrad/10)
@@ -345,24 +293,74 @@ class CarromBoard():
 		self.peg_list.draw(self.screen)
 		self.striker_list.draw(self.screen)
 
+		myfont = pygame.font.SysFont("Times New Roman", 30)
+		myfont1 = pygame.font.SysFont("Times New Roman", 20)
+		label = myfont.render("Score", 1, BLACK)
+		player1 = myfont.render("Player 1: "+str(self.striker.player1score), 1, BLACK)
+		player2 = myfont.render("Player 2: "+str(self.striker.player2score), 1, BLACK)
+		dev1 = myfont1.render("Developed by:", 1, BLACK)
+		dev2 = myfont1.render("Abhishek Kumar", 1, BLACK)
+		dev3 = myfont1.render("Gaurav Shastri", 1, BLACK)
+		dev4 = myfont1.render("Under the guidance of:", 1, BLACK)
+		dev5 = myfont1.render("Dr. Gaurav Harit", 1, BLACK)
+		self.screen.blit(label, (wid+2*strikerrad, 4*strikerrad))
+		self.screen.blit(player1, (wid+2*strikerrad, 6*strikerrad))
+		self.screen.blit(player2, (wid+2*strikerrad, 8*strikerrad))
+		self.screen.blit(dev1, (wid+strikerrad, 22*strikerrad))
+		self.screen.blit(dev2, (wid+strikerrad, 23*strikerrad))
+		self.screen.blit(dev3, (wid+strikerrad, 24*strikerrad))
+		self.screen.blit(dev4, (wid+strikerrad, 30*strikerrad))
+		self.screen.blit(dev5, (wid+strikerrad, 31*strikerrad))
+
 	
 	def run(self):
 		GAME_INIT=0
 		self.state=0
 		flag=0
+		queen_capt=0
+		whcount=9
+		blcount=9
 		while True:
 			for event in pygame.event.get():
 				if event.type==QUIT:
 					pygame.quit()
 					sys.exit()
+				if whcount==0:
+					if queen_capt==8:
+						player1score+=50
+					myfont = pygame.font.SysFont("Times New Roman", 50)					
+					dev1 = myfont.render("Player1 wins", 1, BLACK)	
+					self.screen.blit(dev1, (wid/5,wid/2))
+					self.draw()
+				elif blcount==0:
+					if queen_capt==9:
+						player2score+=50
+					myfont = pygame.font.SysFont("Times New Roman", 50)					
+					dev1 = myfont.render("Player2 wins", 1, BLACK)	
+					self.screen.blit(dev1, (wid/5,wid/2))
+					self.draw()
 				elif event.type==MOUSEBUTTONDOWN and event.button == 1:
 					pos = pygame.mouse.get_pos()
 					if self.striker.state==0:
 						self.striker.state=1
-					elif self.striker.state==1 and pos[1]>wid-4.65*Strikerrad and self.striker.player==1:
+					elif self.striker.state==1 and pos[1]>wid-4.65*strikerrad and self.striker.player==1:
 						self.striker.state=2
-					elif self.striker.state==1 and pos[1]<4.65*Strikerrad and self.striker.player==2:
+						flag=0
+						if(queen_capt==1):
+							queen_capt=3
+						if(queen_capt==4):
+							queen_capt=0
+							self.peg_list.add(Peg(PINK, Pegrad-1,25*Pegrad,25*Pegrad))
+							self.draw()
+					elif self.striker.state==1 and pos[1]<4.65*strikerrad and self.striker.player==2:
 						self.striker.state=2
+						flag=0
+						if(queen_capt==2):
+							queen_capt=4
+						if(queen_capt==3):
+							queen_capt=0
+							self.peg_list.add(Peg(PINK, Pegrad-1,25*Pegrad,25*Pegrad))
+							self.draw()
 				elif event.type==MOUSEBUTTONDOWN and event.button == 3 and self.striker.rect.centery==wid-6*Pegrad and self.striker.player==1:
 	 				self.striker.state=0
 	 			elif event.type==MOUSEBUTTONDOWN and event.button == 3 and self.striker.rect.centery==6*Pegrad and self.striker.player==2:
@@ -382,19 +380,19 @@ class CarromBoard():
 						break
 				if not CollidedWithPeg:
 					if self.striker.player==1:			
-						if pos[1]>wid-(4*Strikerrad)-Strikerrad and pos[1]<wid-(4*Strikerrad)+Strikerrad:
-							if(pos[0]<5.5*Strikerrad):
-								self.striker.rect.centerx = 5.5*Strikerrad
-							elif(pos[0]>wid-5.5*Strikerrad):
-								self.striker.rect.centerx = wid-5.5*Strikerrad
+						if pos[1]>wid-(4*strikerrad)-strikerrad and pos[1]<wid-(4*strikerrad)+strikerrad:
+							if(pos[0]<5.5*strikerrad):
+								self.striker.rect.centerx = 5.5*strikerrad
+							elif(pos[0]>wid-5.5*strikerrad):
+								self.striker.rect.centerx = wid-5.5*strikerrad
 							else:
 								self.striker.rect.centerx = pos[0]
 					elif self.striker.player==2:							
-						if pos[1]>3*Strikerrad and pos[1]<5*Strikerrad:
-							if(pos[0]<5.5*Strikerrad):
-								self.striker.rect.centerx = 5.5*Strikerrad
-							elif(pos[0]>wid-5.5*Strikerrad):
-								self.striker.rect.centerx = wid-5.5*Strikerrad
+						if pos[1]>3*strikerrad and pos[1]<5*strikerrad:
+							if(pos[0]<5.5*strikerrad):
+								self.striker.rect.centerx = 5.5*strikerrad
+							elif(pos[0]>wid-5.5*strikerrad):
+								self.striker.rect.centerx = wid-5.5*strikerrad
 							else:
 								self.striker.rect.centerx = pos[0]
 					
@@ -402,9 +400,9 @@ class CarromBoard():
 						if self.striker.rect.centerx != wid/2 : 
 							self.striker.rect.centerx = wid/2 
 						elif pos[0]> wid/2:
-							self.striker.rect.centerx = wid-5.5*Strikerrad
+							self.striker.rect.centerx = wid-5.5*strikerrad
 						else:
-							self.striker.rect.centerx = 5.5*Strikerrad
+							self.striker.rect.centerx = 5.5*strikerrad
 
 			for peg1 in self.peg_list:
 				for peg2 in self.peg_list:
@@ -415,27 +413,77 @@ class CarromBoard():
 			for peg in self.peg_list:
 				peg.collided = False
 				peg.update()
+				if queen_capt==3 or queen_capt==4:
+					if( (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y<27*Pegrad/10+Pegrad/2 ) or (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y<27*Pegrad/10+Pegrad/2) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10)) :
+						if not peg.inhole:
+							peg.sound()
+							peg.velx=0
+							peg.vely=0
+							peg.rect.x=wid*2
+							peg.rect.y=wid*2	
+							peg.inhole=True
+							if(peg.isWhite and self.striker.player==1):
+								self.striker.player1score+=10
+								flag=1
+								queen_capt=8
+								whcount-=1
+							elif(peg.isWhite and self.striker.player==2):
+								self.striker.player1score+=10
+								whcount-=1
+				
+							elif(peg.isBLACK and self.striker.player==2):
+								self.striker.player2score+=10
+								flag=2
+								queen_capt=9
+								blcount-=1
+							elif(peg.isBLACK and self.striker.player==1):
+								self.striker.player2score+=10
+								blcount-=1
+									
+				
+				else:
+					if( (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y<27*Pegrad/10+Pegrad/2 ) or (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y<27*Pegrad/10+Pegrad/2) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10)) :
+						if not peg.inhole:
+							peg.sound()
+							peg.velx=0
+							peg.vely=0
+							peg.rect.x=wid*2
+							peg.rect.y=wid*2	
+							peg.inhole=True
+							if(peg.isWhite ):
+								self.striker.player1score+=10
+								flag=1
+								whcount-=1
+							elif(peg.isBLACK ):
+								self.striker.player2score+=10
+								flag=2
+								blcount-=1
+							elif(peg.isQueen and self.striker.player==1 ):
+								queen_capt=1
+								
+							elif(peg.isQueen and self.striker.player==2 ):
+								queen_capt=2
+								
 
-				if( (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y<27*Pegrad/10+Pegrad/2 ) or (peg.rect.x<27*Pegrad/10+Pegrad/2 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y<27*Pegrad/10+Pegrad/2) or (peg.rect.x+(5*Pegrad/2)>wid-27*Pegrad/10 and peg.rect.y+(5*Pegrad/2)>wid-27*Pegrad/10)) :
-					if not peg.inhole:
-						peg.sound()
-						peg.velx=0
-						peg.vely=0
-						peg.rect.x=wid*2
-						peg.rect.y=wid*2	
-						peg.inhole=True
-						if(peg.isWhite):
-							flag=1
-						if(peg.isBlack):
-							flag=2
-			
-			if(flag==1):
-				self.striker.player1score+=10
-				flag=0
-			if(flag==2):
-				self.striker.player2score+=10
-				flag=0
-
+			if( (self.striker.rect.x<27*strikerrad/10+strikerrad/2 and self.striker.rect.y<27*strikerrad/10+strikerrad/2 ) or (self.striker.rect.x<27*strikerrad/10+strikerrad/2 and self.striker.rect.y+(5*strikerrad/2)>wid-27*strikerrad/10) or (self.striker.rect.x+(5*strikerrad/2)>wid-27*strikerrad/10 and self.striker.rect.y<27*strikerrad/10+strikerrad/2) or (self.striker.rect.x+(5*strikerrad/2)>wid-27*strikerrad/10 and self.striker.rect.y+(5*strikerrad/2)>wid-27*strikerrad/10)) :
+				self.striker.sound()
+				self.striker.rect.x=wid/2
+				self.striker.velx=0
+				self.striker.vely=0
+				if self.striker.player==1:
+					self.striker.rect.y=wid-6*Pegrad
+					if(self.striker.player1score>0):
+						self.striker.player1score-=10
+						whcount+=1
+						self.peg_list.add(Peg(CREAM, Pegrad-1,25*Pegrad,25*Pegrad))
+						self.draw()
+				elif self.striker.player==2:
+					self.striker.rect.y=6*Pegrad
+					if(self.striker.player2score>0):
+						self.striker.player2score-=10
+						blcount+=1
+						self.peg_list.add(Peg(BLACK, Pegrad-1,25*Pegrad,25*Pegrad))
+						self.draw()
 
 			if self.striker.state==2:
 				for peg in self.peg_list:
@@ -451,55 +499,100 @@ class CarromBoard():
 
 			if self.striker.state==1 and self.striker.player==1:
 					pos = pygame.mouse.get_pos()
-					if(pos[1]>wid-4.65*Strikerrad and pos[1]<wid-3*Pegrad/2 and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
+					if(pos[1]>wid-4.65*strikerrad and pos[1]<wid-3*Pegrad/2 and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
 						pygame.draw.lines(self.screen,GREEN, False,[(self.striker.rect.centerx,self.striker.rect.centery),(pos[0],pos[1])],5)
-					elif(pos[1]>3*Pegrad/2 and pos[1]<wid-4.65*Strikerrad and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
+					elif(pos[1]>3*Pegrad/2 and pos[1]<wid-4.65*strikerrad and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
 						pygame.draw.lines(self.screen,RED, False,[(self.striker.rect.centerx,self.striker.rect.centery),(pos[0],pos[1])],5)	
 			elif self.striker.state==1 and self.striker.player==2:
 					pos = pygame.mouse.get_pos()
-					if(pos[1]>3*Pegrad/2 and pos[1]<4.65*Strikerrad and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
+					if(pos[1]>3*Pegrad/2 and pos[1]<4.65*strikerrad and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
 						pygame.draw.lines(self.screen,GREEN, False,[(self.striker.rect.centerx,self.striker.rect.centery),(pos[0],pos[1])],5)
-					elif(pos[1]>4.65*Strikerrad and pos[1]<wid-3*Pegrad/2 and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
+					elif(pos[1]>4.65*strikerrad and pos[1]<wid-3*Pegrad/2 and pos[0]>3*Pegrad/2 and pos[0]<wid-3*Pegrad/2):
 						pygame.draw.lines(self.screen,RED, False,[(self.striker.rect.centerx,self.striker.rect.centery),(pos[0],pos[1])],5)	
 
 			if stopped and self.striker.state==2 and self.striker.player==1:
 				self.striker.state = 0
-				self.striker.rect.centery=6*Pegrad
-				pos = pygame.mouse.get_pos()
-				if pos[0]>5.5*Strikerrad and pos[0]<wid-5.5*Strikerrad:
-					self.striker.rect.centerx=pos[0]
-				else:
-					if pos[0]>wid-5.5*Strikerrad:
-						self.striker.rect.centerx=wid-5.5*Strikerrad
+
+				if flag==1 :
+					self.striker.rect.centery=44*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
 					else:
-						self.striker.rect.centerx=5.5*Strikerrad
-				self.striker.player=2
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=1
+				elif queen_capt==1:
+					self.striker.rect.centery=44*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
+					else:
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=1
+				else:
+					self.striker.rect.centery=6*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
+					else:
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=2
 				print "Player1:- "+ str(self.striker.player1score)
 				print "Player2:- "+ str(self.striker.player2score)
 			elif stopped and self.striker.state==2 and self.striker.player==2:
 				self.striker.state = 0
-				self.striker.rect.centery=44*Pegrad
-				pos = pygame.mouse.get_pos()
-				if pos[0]>5.5*Strikerrad and pos[0]<wid-5.5*Strikerrad:
-					self.striker.rect.centerx=pos[0]
-				else:
-					if pos[0]>wid-5.5*Strikerrad:
-						self.striker.rect.centerx=wid-5.5*Strikerrad
+				if flag==2:
+					self.striker.rect.centery=6*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
 					else:
-						self.striker.rect.centerx=5.5*Strikerrad
-				self.striker.player=1
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=2
+				if queen_capt==2:
+					self.striker.rect.centery=6*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
+					else:
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=2
+				else:
+					self.striker.rect.centery=44*Pegrad
+					pos = pygame.mouse.get_pos()
+					if pos[0]>5.5*strikerrad and pos[0]<wid-5.5*strikerrad:
+						self.striker.rect.centerx=pos[0]
+					else:
+						if pos[0]>wid-5.5*strikerrad:
+							self.striker.rect.centerx=wid-5.5*strikerrad
+						else:
+							self.striker.rect.centerx=5.5*strikerrad
+					self.striker.player=1
 				print "Player1:- "+ str(self.striker.player1score)
 				print "Player2:- "+ str(self.striker.player2score)
 
 			clock.tick(50)
 
 
-
-
 def main():
 	game = CarromBoard()
 	WhiteCount=9
-	BlackCount=9
+	BLACKCount=9
 	while game.run():
 			pass
 
